@@ -54,6 +54,9 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         if (data.loggedIn) {
+          if (data.token) {
+            import('./utils/api').then(m => m.setAuthToken(data.token));
+          }
           setCurrentUser(data.user);
         } else {
           setCurrentUser(null);
@@ -184,9 +187,9 @@ export default function App() {
 
     return (
       <AdminPanel 
-        onBypassLogin={(username) => {
+        onBypassLogin={async (username) => {
           // Bypassing directly signs user session and navigates admin to dashboard
-          checkActiveSession();
+          await checkActiveSession();
           navigateTo(`/dashboard/${username}`);
         }}
         onLogout={handleLogout}

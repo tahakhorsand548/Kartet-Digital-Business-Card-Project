@@ -7,7 +7,11 @@ import { createServer as createViteServer } from "vite";
 import crypto from "crypto";
 
 const app = express();
-const PORT = 3000;
+app.set('trust proxy', 1);
+
+const PORT = (process.env.PORT && !process.env.DISABLE_HMR)
+  ? parseInt(process.env.PORT, 10)
+  : 3000;
 const JWT_SECRET = "super_secret_jwt_token_for_card_platform";
 
 // Absolute path to persistence file
@@ -340,14 +344,17 @@ function verifyToken(req: any, res: any, next: any) {
   }
 
   if (!token) {
+    console.log("[Auth] verifyToken failed: No token found");
     return res.status(410).json({ message: "توکن معتبر یافت نشد. لطفا مجدد وارد شوید." });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET) as any;
     req.username = decoded.username;
+    console.log(`[Auth] verifyToken success: user=${req.username}`);
     next();
-  } catch (err) {
+  } catch (err: any) {
+    console.log("[Auth] verifyToken failed: token invalid:", err.message);
     return res.status(401).json({ message: "توکن شما منقضی یا نامعتبر شده است." });
   }
 }
@@ -555,8 +562,12 @@ app.get("/api/auth/me", (req, res) => {
       return res.status(401).json({ loggedIn: false });
     }
 
+    // Refresh token
+    const newToken = jwt.sign({ username: user.username }, JWT_SECRET, { expiresIn: "10d" });
+
     return res.json({
       loggedIn: true,
+      token: newToken,
       user: {
         fullName: user.fullName,
         username: user.username,
@@ -567,7 +578,7 @@ app.get("/api/auth/me", (req, res) => {
         qrImageUrl: user.qrImageUrl
       }
     });
-  } catch (err) {
+  } catch (err: any) {
     res.clearCookie("authToken", {
       httpOnly: true,
       secure: true,
@@ -821,8 +832,10 @@ app.post("/api/user/:username/tickets/:ticketId/messages", verifyToken, (req: an
 function verifyAdmin(req: any, res: any, next: any) {
   verifyToken(req, res, () => {
     if (req.username !== "admin") {
+      console.log(`[Auth Admin] Access Denied: User is ${req.username}, expected admin`);
       return res.status(403).json({ message: "شما دسترسی به پنل مدیریت را ندارید." });
     }
+    console.log(`[Auth Admin] Access Granted for admin`);
     next();
   });
 }
@@ -1058,13 +1071,13 @@ app.get("/api/banners", (req, res) => {
 });
 
 app.post("/api/admin/banners", verifyAdmin, (req, res) => {
-  const { banner1, banner2, banner3 } = req.body;
+  const { banner1, banner2, banner3, title1, title2, title3, link1, link2, link3 } = req.body;
   const db = getDB();
 
   db.banners = [
-    { id: "banner1", imageUrl: banner1 || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80", title: "تبلیغات شما در پلتفرم" },
-    { id: "banner2", imageUrl: banner2 || "https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=800&q=80", title: "چاپ نانو کارت هوشمند" },
-    { id: "banner3", imageUrl: banner3 || "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80", title: "مکانیسم رزرو نوبت تلفنی" }
+    { id: "banner1", imageUrl: banner1 || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800&q=80", title: title1 || "تبلیغات شما در پلتفرم", link: link1 || "" },
+    { id: "banner2", imageUrl: banner2 || "https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=800&q=80", title: "چاپ نانو کارت هوشمند", link: link2 || "" },
+    { id: "banner3", imageUrl: banner3 || "https://images.unsplash.com/photo-1600132806370-bf17e65e942f?w=800&q=80", title: title3 || "مکانیسم رزرو نوبت تلفنی", link: link3 || "" }
   ];
 
   saveDB(db);

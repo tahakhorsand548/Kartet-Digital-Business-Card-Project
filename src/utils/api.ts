@@ -10,11 +10,19 @@ try {
 }
 
 export function getAuthToken(): string | null {
+  if (memoryToken) return memoryToken;
   try {
-    return window.localStorage ? (window.localStorage.getItem("authToken") || memoryToken) : memoryToken;
+    if (typeof window !== "undefined" && window.localStorage) {
+      const stored = window.localStorage.getItem("authToken");
+      if (stored) {
+        memoryToken = stored;
+        return stored;
+      }
+    }
   } catch (e) {
-    return memoryToken;
+    console.warn("localStorage access blocked.");
   }
+  return memoryToken;
 }
 
 export function setAuthToken(token: string) {
@@ -50,6 +58,8 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
   } else if (input instanceof Request) {
     url = input.url;
   }
+  
+  console.log(`[apiFetch] Requesting: ${url}. Has token? ${!!token}`);
 
   // Intercept and append token only for standard API requests
   if (token && (url.startsWith("/api/") || url.includes("/api/"))) {
@@ -77,5 +87,5 @@ export async function apiFetch(input: RequestInfo | URL, init?: RequestInit): Pr
     init.headers = headersObj;
   }
 
-  return fetch(input, init);
+  return window.fetch(input, init);
 }

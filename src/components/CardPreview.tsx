@@ -85,7 +85,7 @@ export default function CardPreview({ data, username, isPreview = false }: CardP
 
   return (
     <div 
-      className={`w-full min-h-screen font-sans transition-colors duration-300 ${
+      className={`w-full min-h-screen font-sans transition-colors duration-300 card-preview-scope template-${design?.template || "modern"} ${
         isDark ? "bg-slate-900 text-slate-100" : "bg-white text-slate-800"
       }`}
       style={{ direction: "rtl" }}
@@ -473,18 +473,75 @@ export default function CardPreview({ data, username, isPreview = false }: CardP
       {/* Template-specific Aesthetic Adjustments */}
       {design?.template === "classic" && (
         <style dangerouslySetInnerHTML={{ __html: `
-          .rounded-xl { border-radius: 4px !important; }
-          .rounded-2xl { border-radius: 6px !important; }
-          .rounded-lg { border-radius: 2px !important; }
-          button { border-width: 2px !important; }
+          @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Playfair+Display:ital,wght@0,600;1,400&display=swap');
+          
+          .template-classic {
+            font-family: 'Playfair Display', 'Georgia', serif !important;
+            background-color: ${isDark ? "#0f111a" : "#faf6f0"} !important;
+            color: ${isDark ? "#eae0cc" : "#2d2012"} !important;
+          }
+          .template-classic h1, 
+          .template-classic h2, 
+          .template-classic h3, 
+          .template-classic h4 {
+            font-family: 'Cinzel', 'Playfair Display', serif !important;
+            color: ${isDark ? "#dfb841" : "#997316"} !important;
+            letter-spacing: 0.04em !important;
+            text-transform: uppercase !important;
+            font-weight: 850 !important;
+          }
+          .template-classic button, 
+          .template-classic .rounded-xl, 
+          .template-classic .rounded-2xl,
+          .template-classic .rounded-[24px] {
+            border-radius: 4px !important;
+            border: 3px double ${isDark ? "#dfb841" : "#997316"} !important;
+            font-family: 'Cinzel', 'Playfair Display', serif !important;
+            background-color: ${isDark ? "#161926" : "#ffffff"} !important;
+            color: ${isDark ? "#eae0cc" : "#2d2012"} !important;
+            box-shadow: none !important;
+          }
+          .template-classic hr {
+            border: none !important;
+            height: 3px !important;
+            background: repeating-linear-gradient(90deg, transparent, transparent 4px, ${isDark ? "#dfb841" : "#997316"} 4px, ${isDark ? "#dfb841" : "#997316"} 8px) !important;
+            margin: 20px 0 !important;
+          }
         `}} />
       )}
       {design?.template === "minimalist" && (
         <style dangerouslySetInnerHTML={{ __html: `
-          body { font-weight: 300 !important; }
-          h1, h2, h3, h4 { font-weight: 500 !important; letter-spacing: -0.025em; }
-          .shadow-lg, .shadow-xl, .shadow-md { box-shadow: none !important; border: 1px solid rgba(255,255,255,0.08) !important; }
-          button { border-radius: 0px !important; }
+          @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;700&display=swap');
+          
+          .template-minimalist {
+            font-family: 'Space Grotesk', 'Inter', sans-serif !important;
+            background-color: ${isDark ? "#080808" : "#fafafa"} !important;
+            color: ${isDark ? "#eeeeee" : "#111111"} !important;
+            font-weight: 300 !important;
+          }
+          .template-minimalist h1, 
+          .template-minimalist h2, 
+          .template-minimalist h3, 
+          .template-minimalist h4 {
+            font-weight: 600 !important;
+            letter-spacing: -0.04em !important;
+            color: ${isDark ? "#ffffff" : "#000000"} !important;
+            font-family: 'Space Grotesk', sans-serif !important;
+          }
+          .template-minimalist .shadow-lg, 
+          .template-minimalist .shadow-xl, 
+          .template-minimalist .shadow-md,
+          .template-minimalist .shadow-sm { 
+            box-shadow: none !important; 
+          }
+          .template-minimalist button, 
+          .template-minimalist .rounded-xl, 
+          .template-minimalist .rounded-2xl {
+            border-radius: 0px !important;
+            border: 1px solid ${isDark ? "#2a2a2a" : "#e5e7eb"} !important;
+            background-color: ${isDark ? "#0e0e0e" : "#ffffff"} !important;
+            color: ${isDark ? "#dddddd" : "#333333"} !important;
+          }
         `}} />
       )}
     </div>

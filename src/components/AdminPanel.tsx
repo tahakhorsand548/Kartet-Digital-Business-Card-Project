@@ -1,14 +1,33 @@
 import React, { useState, useEffect } from "react";
-import { 
-  ShieldCheck, LayoutDashboard, Users, QrCode, MessageSquare, 
-  Megaphone, Image, Edit, RotateCcw, Trash, UserX, UserCheck, 
-  ArrowLeft, RefreshCw, Plus, Clock, ExternalLink, ShieldAlert,
-  Save, Eye, CheckCircle, Info, UploadCloud
+import {
+  ShieldCheck,
+  LayoutDashboard,
+  Users,
+  QrCode,
+  MessageSquare,
+  Megaphone,
+  Image,
+  Edit,
+  RotateCcw,
+  Trash,
+  UserX,
+  UserCheck,
+  ArrowLeft,
+  RefreshCw,
+  Plus,
+  Clock,
+  ExternalLink,
+  ShieldAlert,
+  Save,
+  Eye,
+  CheckCircle,
+  Info,
+  UploadCloud,
 } from "lucide-react";
 import { User, Ticket, GlobalAnnouncement } from "../types";
 import { apiFetch, setAuthToken } from "../utils/api";
 
-const fetch = apiFetch;
+// const fetch = apiFetch;
 
 interface AdminPanelProps {
   onBypassLogin: (username: string) => void;
@@ -16,13 +35,23 @@ interface AdminPanelProps {
   onCloseAdmin: () => void;
 }
 
-export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: AdminPanelProps) {
-  const [activeTab, setActiveTab] = useState<"desk" | "users" | "qr" | "tickets" | "announcements" | "banners">("desk");
+export default function AdminPanel({
+  onBypassLogin,
+  onLogout,
+  onCloseAdmin,
+}: AdminPanelProps) {
+  const [activeTab, setActiveTab] = useState<
+    "desk" | "users" | "qr" | "tickets" | "announcements" | "banners"
+  >("desk");
   const [loading, setLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState("");
 
   // States
-  const [deskStats, setDeskStats] = useState({ totalCustomers: 0, cardsWithQr: 0, totalVisits: 0 });
+  const [deskStats, setDeskStats] = useState({
+    totalCustomers: 0,
+    cardsWithQr: 0,
+    totalVisits: 0,
+  });
   const [usersList, setUsersList] = useState<User[]>([]);
   const [qrRequests, setQrRequests] = useState<any[]>([]);
   const [ticketsList, setTicketsList] = useState<Ticket[]>([]);
@@ -53,6 +82,28 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
   const [adBanner2, setAdBanner2] = useState("");
   const [adBanner3, setAdBanner3] = useState("");
 
+  // Banners Links & Titles
+  const [adLink1, setAdLink1] = useState("");
+  const [adLink2, setAdLink2] = useState("");
+  const [adLink3, setAdLink3] = useState("");
+  const [adTitle1, setAdTitle1] = useState("");
+  const [adTitle2, setAdTitle2] = useState("");
+  const [adTitle3, setAdTitle3] = useState("");
+
+  const handleFileInputChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    callback: (url: string) => void,
+  ) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        callback(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   useEffect(() => {
     fetchAdminData();
   }, []);
@@ -62,13 +113,21 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
     setErrorMsg("");
     try {
       // 1. Stats desk
-      const statsRes = await fetch("/api/admin/stats");
+      const statsRes = await apiFetch("/api/admin/stats");
       if (!statsRes.ok) {
-        if (statsRes.status === 401 || statsRes.status === 410 || statsRes.status === 403) {
-          setErrorMsg("توکن امنیتی شما منقضی یا دسترسی تایید نشده است. لطفا مجددا وارد حساب ادمین شوید.");
+        if (
+          statsRes.status === 401 ||
+          statsRes.status === 410 ||
+          statsRes.status === 403
+        ) {
+          setErrorMsg(
+            "توکن امنیتی شما منقضی یا دسترسی تایید نشده است. لطفا مجددا وارد حساب ادمین شوید.",
+          );
           return;
         }
-        setErrorMsg(`خطایی در اتصال به سرور ادمین رخ داده است. کد خطا: ${statsRes.status}`);
+        setErrorMsg(
+          `خطایی در اتصال به سرور ادمین رخ داده است. کد خطا: ${statsRes.status}`,
+        );
         return;
       }
       const stats = await statsRes.json();
@@ -77,7 +136,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
       // 2. Users
       const usersRes = await fetch("/api/admin/users");
       if (!usersRes.ok) {
-        setErrorMsg(`خطا در ارزیابی و دریافت لیست کاربران. کد خطا: ${usersRes.status}`);
+        setErrorMsg(
+          `خطا در ارزیابی و دریافت لیست کاربران. کد خطا: ${usersRes.status}`,
+        );
         return;
       }
       const u = await usersRes.json();
@@ -86,7 +147,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
       // 3. QR Requests
       const qrRes = await fetch("/api/admin/qr-requests");
       if (!qrRes.ok) {
-        setErrorMsg(`خطا در ارزیابی درخواست‌های کیوآرکد. کد خطا: ${qrRes.status}`);
+        setErrorMsg(
+          `خطا در ارزیابی درخواست‌های کیوآرکد. کد خطا: ${qrRes.status}`,
+        );
         return;
       }
       const qr = await qrRes.json();
@@ -95,7 +158,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
       // 4. Tickets List
       const ticketsRes = await fetch("/api/admin/tickets");
       if (!ticketsRes.ok) {
-        setErrorMsg(`خطا در ارزیابی تیکت‌های پشتیبانی. کد خطا: ${ticketsRes.status}`);
+        setErrorMsg(
+          `خطا در ارزیابی تیکت‌های پشتیبانی. کد خطا: ${ticketsRes.status}`,
+        );
         return;
       }
       const t = await ticketsRes.json();
@@ -114,11 +179,16 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
         const ban = await bannersRes.json();
         if (ban && ban.length >= 3) {
           setAdBanner1(ban[0].imageUrl);
+          setAdTitle1(ban[0].title || "");
+          setAdLink1(ban[0].link || "");
           setAdBanner2(ban[1].imageUrl);
+          setAdTitle2(ban[1].title || "");
+          setAdLink2(ban[1].link || "");
           setAdBanner3(ban[2].imageUrl);
+          setAdTitle3(ban[2].title || "");
+          setAdLink3(ban[2].link || "");
         }
       }
-
     } catch (e) {
       console.error(e);
       setErrorMsg("خطای فنی در برقراری ارتباط با پلتفرم ادمین.");
@@ -132,16 +202,19 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
     if (!editingUser) return;
 
     try {
-      const res = await fetch(`/api/admin/users/${editingUser.username}/edit`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          fullName: editFullName,
-          email: editEmail,
-          phone: editPhone,
-          password: editPassword || undefined
-        })
-      });
+      const res = await apiFetch(
+        `/api/admin/users/${editingUser.username}/edit`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            fullName: editFullName,
+            email: editEmail,
+            phone: editPhone,
+            password: editPassword || undefined,
+          }),
+        },
+      );
       if (res.ok) {
         alert("مشخصات کاربر با موفقیت تغییر یافت.");
         setEditingUser(null);
@@ -153,9 +226,16 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
   };
 
   const handleResetUserCard = async (username: string) => {
-    if (!confirm("آیا مایلید تمام تنظیمات بصری، ساعت، گالری و آمار این کارت صفر و ریست شود؟")) return;
+    if (
+      !confirm(
+        "آیا مایلید تمام تنظیمات بصری، ساعت، گالری و آمار این کارت صفر و ریست شود؟",
+      )
+    )
+      return;
     try {
-      const res = await fetch(`/api/admin/users/${username}/reset`, { method: "POST" });
+      const res = await fetch(`/api/admin/users/${username}/reset`, {
+        method: "POST",
+      });
       if (res.ok) {
         alert("کارت کاربر ریست شد.");
         fetchAdminData();
@@ -166,9 +246,16 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
   };
 
   const handleDeleteUser = async (username: string) => {
-    if (!confirm("آیا مایلید این حساب کاربری را به طور کامل و بدون بازگشت حذف کنید؟")) return;
+    if (
+      !confirm(
+        "آیا مایلید این حساب کاربری را به طور کامل و بدون بازگشت حذف کنید؟",
+      )
+    )
+      return;
     try {
-      const res = await fetch(`/api/admin/users/${username}/delete`, { method: "POST" });
+      const res = await fetch(`/api/admin/users/${username}/delete`, {
+        method: "POST",
+      });
       if (res.ok) {
         alert("حساب کاربر کلا از سرور حذف شد.");
         fetchAdminData();
@@ -180,7 +267,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
   const handleToggleSuspend = async (username: string) => {
     try {
-      const res = await fetch(`/api/admin/users/${username}/toggle-suspend`, { method: "POST" });
+      const res = await fetch(`/api/admin/users/${username}/toggle-suspend`, {
+        method: "POST",
+      });
       if (res.ok) {
         const data = await res.json();
         alert(data.message);
@@ -193,7 +282,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
   const handleBypassUserLogin = async (username: string) => {
     try {
-      const res = await fetch(`/api/admin/users/${username}/bypass-login`, { method: "POST" });
+      const res = await fetch(`/api/admin/users/${username}/bypass-login`, {
+        method: "POST",
+      });
       const data = await res.json();
       if (res.ok) {
         if (data.token) {
@@ -234,11 +325,14 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
   const handleApproveQrRequest = async () => {
     if (!selectedQrUser || !uploadedQrBase64) return;
     try {
-      const res = await fetch(`/api/admin/qr-requests/${selectedQrUser.username}/approve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ qrImageUrl: uploadedQrBase64 })
-      });
+      const res = await fetch(
+        `/api/admin/qr-requests/${selectedQrUser.username}/approve`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ qrImageUrl: uploadedQrBase64 }),
+        },
+      );
       if (res.ok) {
         alert("کیوآرکد رسمی با موفقیت بارگذاری و فعال گردید.");
         setSelectedQrUser(null);
@@ -257,16 +351,19 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
     try {
       // Send chat message
-      const res = await fetch(`/api/user/${activeTicket.username}/tickets/${activeTicket.id}/messages`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: adminResponse, sender: "support" })
-      });
+      const res = await fetch(
+        `/api/user/${activeTicket.username}/tickets/${activeTicket.id}/messages`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: adminResponse, sender: "support" }),
+        },
+      );
       if (res.ok) {
         const newMsg = await res.json();
         const updated = {
           ...activeTicket,
-          messages: [...activeTicket.messages, newMsg]
+          messages: [...activeTicket.messages, newMsg],
         };
         setActiveTicket(updated);
         setAdminResponse("");
@@ -278,12 +375,15 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
     }
   };
 
-  const handleUpdateTicketStatus = async (ticketId: string, status: 'read' | 'under_review' | 'ended') => {
+  const handleUpdateTicketStatus = async (
+    ticketId: string,
+    status: "read" | "under_review" | "ended",
+  ) => {
     try {
       const res = await fetch(`/api/admin/tickets/${ticketId}/status`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status })
+        body: JSON.stringify({ status }),
       });
       if (res.ok) {
         alert("وضعیت تیکت تغییر یافت.");
@@ -305,7 +405,11 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
       const res = await fetch("/api/admin/announcements", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ title: annTitle, description: annDesc, image: annImage })
+        body: JSON.stringify({
+          title: annTitle,
+          description: annDesc,
+          image: annImage,
+        }),
       });
       if (res.ok) {
         alert("اعلان همگانی هم‌اکنون برای تمام کاربران منتشر شد.");
@@ -321,7 +425,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
   const handleDeleteAnnouncement = async (annId: string) => {
     try {
-      const res = await fetch(`/api/admin/announcements/${annId}`, { method: "DELETE" });
+      const res = await fetch(`/api/admin/announcements/${annId}`, {
+        method: "DELETE",
+      });
       if (res.ok) {
         alert("اعلان حذف شد.");
         fetchAdminData();
@@ -337,7 +443,17 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
       const res = await fetch("/api/admin/banners", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ banner1: adBanner1, banner2: adBanner2, banner3: adBanner3 })
+        body: JSON.stringify({
+          banner1: adBanner1,
+          title1: adTitle1,
+          link1: adLink1,
+          banner2: adBanner2,
+          title2: adTitle2,
+          link2: adLink2,
+          banner3: adBanner3,
+          title3: adTitle3,
+          link3: adLink3,
+        }),
       });
       if (res.ok) {
         alert("بنرهای تبلیغاتی با موفقیت ذخیره شدند.");
@@ -363,8 +479,12 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
         <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-5 animate-pulse">
           <ShieldAlert className="w-8 h-8" />
         </div>
-        <h2 className="text-lg font-bold text-white">خطا در بارگذاری پنل مدیریت</h2>
-        <p className="text-sm text-slate-400 mt-2 max-w-sm leading-relaxed">{errorMsg}</p>
+        <h2 className="text-lg font-bold text-white">
+          خطا در بارگذاری پنل مدیریت
+        </h2>
+        <p className="text-sm text-slate-400 mt-2 max-w-sm leading-relaxed">
+          {errorMsg}
+        </p>
         <div className="flex gap-3 justify-center mt-6">
           <button
             onClick={fetchAdminData}
@@ -386,7 +506,6 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row text-right">
-      
       {/* Admin Sidebar options */}
       <aside className="w-full md:w-80 bg-slate-900 border-b md:border-b-0 md:border-l border-slate-800 p-6 flex flex-col justify-between">
         <div className="space-y-6">
@@ -395,8 +514,12 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div>
-              <h3 className="font-extrabold text-sm text-slate-50">پنل ادمین کانتینر</h3>
-              <p className="text-[10px] text-slate-400">مدیریت هاب سرور و کاربران</p>
+              <h3 className="font-extrabold text-sm text-slate-50">
+                پنل ادمین کانتینر
+              </h3>
+              <p className="text-[10px] text-slate-400">
+                مدیریت هاب سرور و کاربران
+              </p>
             </div>
           </div>
 
@@ -404,7 +527,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <button
               onClick={() => setActiveTab("desk")}
               className={`w-full py-2.5 px-4 rounded-xl flex items-center gap-3 text-xs font-bold transition-all ${
-                activeTab === "desk" ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                activeTab === "desk"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
               <LayoutDashboard className="w-4 h-4" />
@@ -414,7 +539,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <button
               onClick={() => setActiveTab("users")}
               className={`w-full py-2.5 px-4 rounded-xl flex items-center gap-3 text-xs font-bold transition-all ${
-                activeTab === "users" ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                activeTab === "users"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
               <Users className="w-4 h-4" />
@@ -424,7 +551,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <button
               onClick={() => setActiveTab("qr")}
               className={`w-full py-2.5 px-4 rounded-xl flex items-center gap-3 text-xs font-bold transition-all ${
-                activeTab === "qr" ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                activeTab === "qr"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
               <QrCode className="w-4 h-4" />
@@ -434,7 +563,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <button
               onClick={() => setActiveTab("tickets")}
               className={`w-full py-2.5 px-4 rounded-xl flex items-center gap-3 text-xs font-bold transition-all ${
-                activeTab === "tickets" ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                activeTab === "tickets"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
               <MessageSquare className="w-4 h-4" />
@@ -444,7 +575,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <button
               onClick={() => setActiveTab("announcements")}
               className={`w-full py-2.5 px-4 rounded-xl flex items-center gap-3 text-xs font-bold transition-all ${
-                activeTab === "announcements" ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                activeTab === "announcements"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
               <Megaphone className="w-4 h-4" />
@@ -454,7 +587,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <button
               onClick={() => setActiveTab("banners")}
               className={`w-full py-2.5 px-4 rounded-xl flex items-center gap-3 text-xs font-bold transition-all ${
-                activeTab === "banners" ? "bg-indigo-600 text-white" : "text-slate-400 hover:bg-slate-800 hover:text-white"
+                activeTab === "banners"
+                  ? "bg-indigo-600 text-white"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
               }`}
             >
               <Image className="w-4 h-4" />
@@ -482,21 +617,29 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
       {/* Main Workspace container */}
       <main className="flex-1 p-6 md:p-8 overflow-y-auto max-h-screen">
-        
         {/* TAB 1: DESK STATS overview */}
         {activeTab === "desk" && (
           <div className="space-y-8">
             <div>
-              <h2 className="text-xl font-bold text-white">میز کار و داشبورد کلی ادمین</h2>
-              <p className="text-xs text-slate-400 mt-1">آمار تحلیلی پلتفرم کارت ویزیت دیجیتال در سرور جاری را زیرنظر بگیرید.</p>
+              <h2 className="text-xl font-bold text-white">
+                میز کار و داشبورد کلی ادمین
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                آمار تحلیلی پلتفرم کارت ویزیت دیجیتال در سرور جاری را زیرنظر
+                بگیرید.
+              </p>
             </div>
 
             {/* Stats list */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 block font-medium">تعداد کل مشتریان سایت :</span>
-                  <span className="text-2xl font-black text-white font-mono mt-1.5 block">{deskStats.totalCustomers} کاربر</span>
+                  <span className="text-xs text-slate-400 block font-medium">
+                    تعداد کل مشتریان سایت :
+                  </span>
+                  <span className="text-2xl font-black text-white font-mono mt-1.5 block">
+                    {deskStats.totalCustomers} کاربر
+                  </span>
                 </div>
                 <div className="p-3 rounded-xl bg-indigo-500/10 text-indigo-400">
                   <Users className="w-6 h-6" />
@@ -505,8 +648,12 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 block font-medium">کارت های دارای کیوآرکد فعال :</span>
-                  <span className="text-2xl font-black text-white font-mono mt-1.5 block">{deskStats.cardsWithQr} کارت</span>
+                  <span className="text-xs text-slate-400 block font-medium">
+                    کارت های دارای کیوآرکد فعال :
+                  </span>
+                  <span className="text-2xl font-black text-white font-mono mt-1.5 block">
+                    {deskStats.cardsWithQr} کارت
+                  </span>
                 </div>
                 <div className="p-3 rounded-xl bg-emerald-500/10 text-emerald-400">
                   <QrCode className="w-6 h-6" />
@@ -515,8 +662,12 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 flex items-center justify-between">
                 <div>
-                  <span className="text-xs text-slate-400 block font-medium">تعداد کل بازدید کارت ها :</span>
-                  <span className="text-2xl font-black text-white font-mono mt-1.5 block">{deskStats.totalVisits} بازدید</span>
+                  <span className="text-xs text-slate-400 block font-medium">
+                    تعداد کل بازدید کارت ها :
+                  </span>
+                  <span className="text-2xl font-black text-white font-mono mt-1.5 block">
+                    {deskStats.totalVisits} بازدید
+                  </span>
                 </div>
                 <div className="p-3 rounded-xl bg-orange-500/10 text-orange-400">
                   <ExternalLink className="w-6 h-6" />
@@ -528,56 +679,86 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 pt-4">
               {/* Ticket warnings Inbox */}
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-xs font-bold text-slate-300 block">آخرین تیکت های بدون پاسخ کاربران :</span>
-                {ticketsList.filter(t => t.status !== "ended").length === 0 ? (
-                  <p className="text-xs text-slate-500 py-4">تمامی تیکت های کاربران بررسی و بسته شده‌اند. ✅</p>
+                <span className="text-xs font-bold text-slate-300 block">
+                  آخرین تیکت های بدون پاسخ کاربران :
+                </span>
+                {ticketsList.filter((t) => t.status !== "ended").length ===
+                0 ? (
+                  <p className="text-xs text-slate-500 py-4">
+                    تمامی تیکت های کاربران بررسی و بسته شده‌اند. ✅
+                  </p>
                 ) : (
                   <div className="space-y-2.5 max-h-[220px] overflow-y-auto">
-                    {ticketsList.filter(t => t.status !== "ended").map(t => (
-                      <div key={t.id} className="p-3 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-xs">
-                        <div>
-                          <h4 className="font-bold text-slate-200">{t.title}</h4>
-                          <span className="text-[10px] text-slate-500">کاربر: {t.username}</span>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setActiveTicket(t);
-                            setActiveTab("tickets");
-                          }}
-                          className="py-1 px-3 bg-indigo-600 text-white rounded text-[10px] font-bold"
+                    {ticketsList
+                      .filter((t) => t.status !== "ended")
+                      .slice()
+                      .sort((a, b) => b.id.localeCompare(a.id))
+                      .map((t) => (
+                        <div
+                          key={t.id}
+                          className="p-3 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-xs"
                         >
-                          پاسخ و تایید
-                        </button>
-                      </div>
-                    ))}
+                          <div>
+                            <h4 className="font-bold text-slate-200">
+                              {t.title}
+                            </h4>
+                            <span className="text-[10px] text-slate-500">
+                              کاربر: {t.username}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setActiveTicket(t);
+                              setActiveTab("tickets");
+                            }}
+                            className="py-1 px-3 bg-indigo-600 text-white rounded text-[10px] font-bold"
+                          >
+                            پاسخ و تایید
+                          </button>
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>
 
               {/* QR alert inbox requests */}
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-xs font-bold text-slate-300 block">اعلانات تقاضای فعالسازی کیوآرکد رسمی :</span>
-                {qrRequests.filter(q => q.qrRequestStatus === "pending").length === 0 ? (
-                  <p className="text-xs text-slate-500 py-4">هیچ درخواست کیوآرکد در صف بررسی وجود ندارد.</p>
+                <span className="text-xs font-bold text-slate-300 block">
+                  اعلانات تقاضای فعالسازی کیوآرکد رسمی :
+                </span>
+                {qrRequests.filter((q) => q.qrRequestStatus === "pending")
+                  .length === 0 ? (
+                  <p className="text-xs text-slate-500 py-4">
+                    هیچ درخواست کیوآرکد در صف بررسی وجود ندارد.
+                  </p>
                 ) : (
                   <div className="space-y-2.5 max-h-[220px] overflow-y-auto">
-                    {qrRequests.filter(q => q.qrRequestStatus === "pending").map(q => (
-                      <div key={q.username} className="p-3 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-xs">
-                        <div>
-                          <h4 className="font-bold text-slate-200">برند: {q.fullName}</h4>
-                          <span className="text-[10px] text-slate-500 font-mono">کاربر: {q.username} - زمان: {q.qrRequestTime}</span>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setSelectedQrUser(q);
-                            setActiveTab("qr");
-                          }}
-                          className="py-1 px-3 bg-emerald-600 text-white rounded text-[10px] font-bold"
+                    {qrRequests
+                      .filter((q) => q.qrRequestStatus === "pending")
+                      .map((q) => (
+                        <div
+                          key={q.username}
+                          className="p-3 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-xs"
                         >
-                          آپلود کیوآرکد
-                        </button>
-                      </div>
-                    ))}
+                          <div>
+                            <h4 className="font-bold text-slate-200">
+                              برند: {q.fullName}
+                            </h4>
+                            <span className="text-[10px] text-slate-500 font-mono">
+                              کاربر: {q.username} - زمان: {q.qrRequestTime}
+                            </span>
+                          </div>
+                          <button
+                            onClick={() => {
+                              setSelectedQrUser(q);
+                              setActiveTab("qr");
+                            }}
+                            className="py-1 px-3 bg-emerald-600 text-white rounded text-[10px] font-bold"
+                          >
+                            آپلود کیوآرکد
+                          </button>
+                        </div>
+                      ))}
                   </div>
                 )}
               </div>
@@ -590,8 +771,13 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-extrabold text-white">مدیریت پروانه‌ها و مشتریان جاری</h2>
-                <p className="text-xs text-slate-400 mt-1">حساب ها را ویرایش، تعلیق، بازنشانی، یا با دور زدن لاگین به آنها دسترسی پیدا کنید.</p>
+                <h2 className="text-xl font-extrabold text-white">
+                  مدیریت پروانه‌ها و مشتریان جاری
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">
+                  حساب ها را ویرایش، تعلیق، بازنشانی، یا با دور زدن لاگین به
+                  آنها دسترسی پیدا کنید.
+                </p>
               </div>
             </div>
 
@@ -603,32 +789,50 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                     <th className="pb-3 px-2">نام کاربری اختصاصی</th>
                     <th className="pb-3 px-2">آدرس ایمیل ثبت نامی</th>
                     <th className="pb-3 px-2">شماره تماس</th>
-                    <th className="pb-3 px-2 text-center">وضعیت حساب / فعالیت</th>
+                    <th className="pb-3 px-2 text-center">
+                      وضعیت حساب / فعالیت
+                    </th>
                     <th className="pb-3 px-2 text-left">عملیات ادیمن</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
                   {usersList.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-6 text-slate-500">تاکنون هیچ کاربری ثبت نام نکرده است.</td>
+                      <td
+                        colSpan={6}
+                        className="text-center py-6 text-slate-500"
+                      >
+                        تاکنون هیچ کاربری ثبت نام نکرده است.
+                      </td>
                     </tr>
                   ) : (
                     usersList.map((u) => (
                       <tr key={u.username} className="hover:bg-slate-950/20">
-                        <td className="py-3 px-2 text-slate-100 font-bold">{u.fullName}</td>
-                        <td className="py-3 px-2 text-blue-400 font-mono">{u.username}</td>
-                        <td className="py-3 px-2 text-slate-350 font-mono">{u.email}</td>
-                        <td className="py-3 px-2 text-slate-350 font-mono">{u.phone}</td>
+                        <td className="py-3 px-2 text-slate-100 font-bold">
+                          {u.fullName}
+                        </td>
+                        <td className="py-3 px-2 text-blue-400 font-mono">
+                          {u.username}
+                        </td>
+                        <td className="py-3 px-2 text-slate-350 font-mono">
+                          {u.email}
+                        </td>
+                        <td className="py-3 px-2 text-slate-350 font-mono">
+                          {u.phone}
+                        </td>
                         <td className="py-3 px-2 text-center">
                           {u.isSuspended ? (
-                            <span className="py-0.5 px-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full font-bold text-[10px]">تعلیق شده 🔴</span>
+                            <span className="py-0.5 px-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full font-bold text-[10px]">
+                              تعلیق شده 🔴
+                            </span>
                           ) : (
-                            <span className="py-0.5 px-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold text-[10px]">فعال 🟢</span>
+                            <span className="py-0.5 px-2 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full font-bold text-[10px]">
+                              فعال 🟢
+                            </span>
                           )}
                         </td>
                         <td className="py-3 px-2 text-left">
                           <div className="flex flex-wrap items-center justify-end gap-1.5">
-                            
                             {/* Bypass click */}
                             <button
                               onClick={() => handleBypassUserLogin(u.username)}
@@ -643,7 +847,9 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                             <button
                               onClick={() => handleToggleSuspend(u.username)}
                               className={`py-1 px-2 text-white rounded text-[10px] font-bold ${
-                                u.isSuspended ? "bg-emerald-600 hover:bg-emerald-550" : "bg-orange-600 hover:bg-orange-550"
+                                u.isSuspended
+                                  ? "bg-emerald-600 hover:bg-emerald-550"
+                                  : "bg-orange-600 hover:bg-orange-550"
                               }`}
                             >
                               {u.isSuspended ? "رفع تعلیق" : "تعلیق کارت"}
@@ -681,7 +887,6 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                             >
                               <Trash className="w-3.5 h-3.5" />
                             </button>
-
                           </div>
                         </td>
                       </tr>
@@ -697,37 +902,57 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
         {activeTab === "qr" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-extrabold text-white">درخواست های طراحی کیوآرکد مشتریان</h2>
-              <p className="text-xs text-slate-400 mt-1">پس از طراحی کیوآرکد فیزیکی، تصویر ساخته شده را برای کاربر بارگذاری کنید تا در پنل او نمایش یابد.</p>
+              <h2 className="text-xl font-extrabold text-white">
+                درخواست های طراحی کیوآرکد مشتریان
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                پس از طراحی کیوآرکد فیزیکی، تصویر ساخته شده را برای کاربر
+                بارگذاری کنید تا در پنل او نمایش یابد.
+              </p>
             </div>
 
             <div className="p-5 rounded-2xl bg-slate-900 border border-slate-850">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                
                 {/* Lists requested queue */}
                 <div className="space-y-3">
-                  <span className="text-xs font-bold text-slate-400 block pb-1">لیست بررسی درخواست ها :</span>
+                  <span className="text-xs font-bold text-slate-400 block pb-1">
+                    لیست بررسی درخواست ها :
+                  </span>
                   {qrRequests.length === 0 ? (
-                    <p className="text-xs text-slate-500 py-6">هیچ کاربری تاکنون درخواستی برای کیوآرکد ثبت نکرده است.</p>
+                    <p className="text-xs text-slate-500 py-6">
+                      هیچ کاربری تاکنون درخواستی برای کیوآرکد ثبت نکرده است.
+                    </p>
                   ) : (
                     qrRequests.map((q) => (
-                      <div 
+                      <div
                         key={q.username}
                         className={`p-4 rounded-xl border flex items-center justify-between transition ${
-                          selectedQrUser?.username === q.username ? "bg-indigo-600/15 border-indigo-500" : "bg-slate-950 border-slate-850"
+                          selectedQrUser?.username === q.username
+                            ? "bg-indigo-600/15 border-indigo-500"
+                            : "bg-slate-950 border-slate-850"
                         }`}
                       >
                         <div>
-                          <h4 className="font-bold text-sm text-white">{q.fullName}</h4>
-                          <span className="text-[10px] text-slate-400 font-mono mt-1 block">نام کاربری: {q.username}</span>
-                          <span className="text-[9px] text-slate-500 block mt-1">زمان نیاز: {q.qrRequestTime}</span>
+                          <h4 className="font-bold text-sm text-white">
+                            {q.fullName}
+                          </h4>
+                          <span className="text-[10px] text-slate-400 font-mono mt-1 block">
+                            نام کاربری: {q.username}
+                          </span>
+                          <span className="text-[9px] text-slate-500 block mt-1">
+                            زمان نیاز: {q.qrRequestTime}
+                          </span>
                         </div>
 
                         <div className="flex flex-col items-end gap-2">
                           {q.qrRequestStatus === "approved" ? (
-                            <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">APPROVED دائم</span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-full">
+                              APPROVED دائم
+                            </span>
                           ) : (
-                            <span className="text-[9px] font-bold px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full animate-pulse">PENDING در انتظار</span>
+                            <span className="text-[9px] font-bold px-2 py-0.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-full animate-pulse">
+                              PENDING در انتظار
+                            </span>
                           )}
                           <button
                             onClick={() => {
@@ -749,18 +974,34 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                   {selectedQrUser ? (
                     <div className="space-y-5">
                       <div className="border-b border-slate-800 pb-3">
-                        <h4 className="font-extrabold text-sm text-yellow-300">طراحی بارکد کارت: {selectedQrUser.fullName}</h4>
-                        <span className="text-xs text-slate-400 mt-1 block">لینک کارت کاربر: <a href={`/card/${selectedQrUser.username}`} target="_blank" className="text-blue-400 underline">{`${window.location.host}/card/${selectedQrUser.username}`}</a></span>
+                        <h4 className="font-extrabold text-sm text-yellow-300">
+                          طراحی بارکد کارت: {selectedQrUser.fullName}
+                        </h4>
+                        <span className="text-xs text-slate-400 mt-1 block">
+                          لینک کارت کاربر:{" "}
+                          <a
+                            href={`/card/${selectedQrUser.username}`}
+                            target="_blank"
+                            className="text-blue-400 underline"
+                          >{`${window.location.host}/card/${selectedQrUser.username}`}</a>
+                        </span>
                       </div>
 
                       {uploadedQrBase64 ? (
                         <div className="text-center p-4 bg-white rounded-xl inline-block mx-auto max-w-[200px]">
-                          <img src={uploadedQrBase64} className="w-32 h-32 object-contain mx-auto" />
-                          <span className="text-[8px] text-slate-500 mt-1 block">پیش نمایش بارکد آپلود شده</span>
+                          <img
+                            src={uploadedQrBase64}
+                            className="w-32 h-32 object-contain mx-auto"
+                          />
+                          <span className="text-[8px] text-slate-500 mt-1 block">
+                            پیش نمایش بارکد آپلود شده
+                          </span>
                         </div>
                       ) : (
                         <div className="w-full text-center p-6 border border-dashed border-slate-800 rounded-xl text-slate-500 text-xs text-wrap">
-                          تصویری بارگذاری نشده است. می توانید به صورت خودکار بارکد استاندارد تولید کنید یا خود فایل باکیفیت بنر قرار دهید.
+                          تصویری بارگذاری نشده است. می توانید به صورت خودکار
+                          بارکد استاندارد تولید کنید یا خود فایل باکیفیت بنر
+                          قرار دهید.
                         </div>
                       )}
 
@@ -775,8 +1016,8 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                         </button>
                         {/* Manual File input */}
                         <div className="relative">
-                          <input 
-                            type="file" 
+                          <input
+                            type="file"
                             accept="image/*"
                             id="adminQrFile"
                             onChange={(e) => {
@@ -786,7 +1027,7 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                             }}
                             className="hidden"
                           />
-                          <label 
+                          <label
                             htmlFor="adminQrFile"
                             className="w-full py-2 px-4 rounded-lg bg-indigo-600/10 hover:bg-indigo-600/20 border border-indigo-600/25 text-indigo-400 text-xs font-bold transition flex items-center justify-center gap-1 cursor-pointer"
                           >
@@ -807,12 +1048,16 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                   ) : (
                     <div className="flex flex-col items-center justify-center flex-1 text-center py-10 space-y-2">
                       <QrCode className="w-12 h-12 text-slate-800" />
-                      <h4 className="font-extrabold text-xs text-slate-400">کاربری را انتخاب کنید</h4>
-                      <p className="text-[10px] text-slate-500">جهت قرار دادن عکس کیوآرکد رسمی، یک درخواست را از منوی سمت راست برگزینید.</p>
+                      <h4 className="font-extrabold text-xs text-slate-400">
+                        کاربری را انتخاب کنید
+                      </h4>
+                      <p className="text-[10px] text-slate-500">
+                        جهت قرار دادن عکس کیوآرکد رسمی، یک درخواست را از منوی
+                        سمت راست برگزینید.
+                      </p>
                     </div>
                   )}
                 </div>
-
               </div>
             </div>
           </div>
@@ -822,43 +1067,66 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
         {activeTab === "tickets" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-extrabold text-white">مرکز دپارتمان پاسخگویی تیکت ها (ادمین)</h2>
-              <p className="text-xs text-slate-400 mt-1">با مشتریان گفتگو کنید و وضعیت تیکت ها را جهت مدیریت گردش های کاری تنظیم فرمایید.</p>
+              <h2 className="text-xl font-extrabold text-white">
+                مرکز دپارتمان پاسخگویی تیکت ها (ادمین)
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                با مشتریان گفتگو کنید و وضعیت تیکت ها را جهت مدیریت گردش های
+                کاری تنظیم فرمایید.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-              
               {/* Tickets list */}
               <div className="lg:col-span-1 space-y-3">
-                <span className="text-xs font-bold text-slate-300 block">صندوق تیکت ها :</span>
+                <span className="text-xs font-bold text-slate-300 block">
+                  صندوق تیکت ها :
+                </span>
                 {ticketsList.length === 0 ? (
-                  <p className="text-xs text-slate-500 text-center py-8">تیکتی یافت نشد.</p>
+                  <p className="text-xs text-slate-500 text-center py-8">
+                    تیکتی یافت نشد.
+                  </p>
                 ) : (
                   <div className="space-y-2 max-h-[450px] overflow-y-auto pr-1">
-                    {ticketsList.map((t) => (
-                      <button
-                        key={t.id}
-                        onClick={() => setActiveTicket(t)}
-                        className={`w-full p-4 rounded-xl border text-right transition flex flex-col justify-between ${
-                          activeTicket?.id === t.id ? "bg-indigo-600/10 border-indigo-500/40 text-white" : "bg-slate-900 border-slate-800 text-slate-400"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <span className="font-extrabold text-xs text-slate-100">{t.title}</span>
-                          <span className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                            t.status === "read" ? "bg-amber-500/10 text-amber-400" :
-                            t.status === "under_review" ? "bg-blue-500/10 text-blue-400" :
-                            "bg-slate-850 text-slate-500"
-                          }`}>
-                            {t.status === "read" ? "خوانده شد" : t.status === "under_review" ? "در حال بررسی" : "بسته شده"}
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between w-full mt-3 text-[10px] opacity-75">
-                          <span>کاربر: {t.username}</span>
-                          <span className="font-mono">{t.createdAt}</span>
-                        </div>
-                      </button>
-                    ))}
+                    {ticketsList
+                      .slice()
+                      .sort((a, b) => b.id.localeCompare(a.id))
+                      .map((t) => (
+                        <button
+                          key={t.id}
+                          onClick={() => setActiveTicket(t)}
+                          className={`w-full p-4 rounded-xl border text-right transition flex flex-col justify-between ${
+                            activeTicket?.id === t.id
+                              ? "bg-indigo-600/10 border-indigo-500/40 text-white"
+                              : "bg-slate-900 border-slate-800 text-slate-400"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between w-full">
+                            <span className="font-extrabold text-xs text-slate-100">
+                              {t.title}
+                            </span>
+                            <span
+                              className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
+                                t.status === "read"
+                                  ? "bg-amber-500/10 text-amber-400"
+                                  : t.status === "under_review"
+                                    ? "bg-blue-500/10 text-blue-400"
+                                    : "bg-slate-850 text-slate-500"
+                              }`}
+                            >
+                              {t.status === "read"
+                                ? "خوانده شد"
+                                : t.status === "under_review"
+                                  ? "در حال بررسی"
+                                  : "بسته شده"}
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between w-full mt-3 text-[10px] opacity-75">
+                            <span>کاربر: {t.username}</span>
+                            <span className="font-mono">{t.createdAt}</span>
+                          </div>
+                        </button>
+                      ))}
                   </div>
                 )}
               </div>
@@ -869,32 +1137,52 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                   <div className="flex flex-col justify-between h-[420px]">
                     <div className="border-b border-sidebar border-slate-800 pb-3 flex items-center justify-between">
                       <div>
-                        <h4 className="font-extrabold text-sm text-slate-200">{activeTicket.title}</h4>
-                        <span className="text-[10px] text-slate-500 block">ارسال کننده: {activeTicket.userFullName} ({activeTicket.username})</span>
+                        <h4 className="font-extrabold text-sm text-slate-200">
+                          {activeTicket.title}
+                        </h4>
+                        <span className="text-[10px] text-slate-500 block">
+                          ارسال کننده: {activeTicket.userFullName} (
+                          {activeTicket.username})
+                        </span>
                       </div>
 
                       {/* Status select switches */}
                       <div className="flex gap-1">
                         <button
-                          onClick={() => handleUpdateTicketStatus(activeTicket.id, "read")}
+                          onClick={() =>
+                            handleUpdateTicketStatus(activeTicket.id, "read")
+                          }
                           className={`py-1 px-2.5 rounded text-[10px] font-bold ${
-                            activeTicket.status === "read" ? "bg-amber-600 text-white" : "bg-slate-950 text-slate-500"
+                            activeTicket.status === "read"
+                              ? "bg-amber-600 text-white"
+                              : "bg-slate-950 text-slate-500"
                           }`}
                         >
                           خوانده شد
                         </button>
                         <button
-                          onClick={() => handleUpdateTicketStatus(activeTicket.id, "under_review")}
+                          onClick={() =>
+                            handleUpdateTicketStatus(
+                              activeTicket.id,
+                              "under_review",
+                            )
+                          }
                           className={`py-1 px-2.5 rounded text-[10px] font-bold ${
-                            activeTicket.status === "under_review" ? "bg-blue-600 text-white" : "bg-slate-950 text-slate-500"
+                            activeTicket.status === "under_review"
+                              ? "bg-blue-600 text-white"
+                              : "bg-slate-950 text-slate-500"
                           }`}
                         >
                           درحال بررسی
                         </button>
                         <button
-                          onClick={() => handleUpdateTicketStatus(activeTicket.id, "ended")}
+                          onClick={() =>
+                            handleUpdateTicketStatus(activeTicket.id, "ended")
+                          }
                           className={`py-1 px-2.5 rounded text-[10px] font-bold ${
-                            activeTicket.status === "ended" ? "bg-slate-800 text-slate-350" : "bg-slate-950 text-slate-500 hover:text-red-400"
+                            activeTicket.status === "ended"
+                              ? "bg-slate-800 text-slate-350"
+                              : "bg-slate-950 text-slate-500 hover:text-red-400"
                           }`}
                         >
                           پایان چت با کاربر
@@ -904,15 +1192,22 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
                     {/* Messages Body */}
                     <div className="flex-1 overflow-y-auto space-y-4 py-4 px-2 my-2 scrollbar-none">
-                      {activeTicket.messages.map(m => (
-                        <div key={m.id} className={`flex ${m.sender === "support" ? "justify-end" : "justify-start"}`}>
-                          <div className={`p-3.5 rounded-2xl max-w-[80%] text-xs leading-relaxed ${
-                            m.sender === "support" 
-                              ? "bg-indigo-600 text-white rounded-br-none font-bold" 
-                              : "bg-slate-950 text-slate-100 rounded-bl-none border border-slate-850"
-                          }`}>
+                      {activeTicket.messages.map((m) => (
+                        <div
+                          key={m.id}
+                          className={`flex ${m.sender === "support" ? "justify-end" : "justify-start"}`}
+                        >
+                          <div
+                            className={`p-3.5 rounded-2xl max-w-[80%] text-xs leading-relaxed ${
+                              m.sender === "support"
+                                ? "bg-indigo-600 text-white rounded-br-none font-bold"
+                                : "bg-slate-950 text-slate-100 rounded-bl-none border border-slate-850"
+                            }`}
+                          >
                             <p>{m.message}</p>
-                            <span className="block text-[8px] opacity-65 mt-1.5 font-mono text-left">{m.createdAt}</span>
+                            <span className="block text-[8px] opacity-65 mt-1.5 font-mono text-left">
+                              {m.createdAt}
+                            </span>
                           </div>
                         </div>
                       ))}
@@ -920,16 +1215,19 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
                     {/* Chat reply form */}
                     {activeTicket.status !== "ended" ? (
-                      <form onSubmit={handleAdminSendChat} className="flex gap-2 border-t border-slate-800 pt-3 mt-1">
-                        <input 
+                      <form
+                        onSubmit={handleAdminSendChat}
+                        className="flex gap-2 border-t border-slate-800 pt-3 mt-1"
+                      >
+                        <input
                           type="text"
                           placeholder="پیام پاسخ خود را برای مجمع به کاربر بنویسید..."
                           value={adminResponse}
                           onChange={(e) => setAdminResponse(e.target.value)}
                           className="flex-1 bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-xs text-slate-200 outline-none"
                         />
-                        <button 
-                          type="submit" 
+                        <button
+                          type="submit"
                           className="py-3 px-6 bg-indigo-600 text-white rounded-xl text-xs font-bold hover:brightness-110 active:scale-95 transition"
                         >
                           ارسال پاسخ
@@ -937,15 +1235,20 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                       </form>
                     ) : (
                       <div className="p-3 bg-red-500/5 text-center rounded-xl text-xs text-red-400 font-bold">
-                        تیکت بسته شده است. در صورت نیاز وضعیت را به فعال برگردانید.
+                        تیکت بسته شده است. در صورت نیاز وضعیت را به فعال
+                        برگردانید.
                       </div>
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center justify-center flex-1 text-center py-10 space-y-2">
                     <MessageSquare className="w-12 h-12 text-slate-700" />
-                    <h4 className="font-extrabold text-xs text-slate-400">تیکتی در فرآیند بررسی پلتفرم نیست</h4>
-                    <p className="text-[10px] text-slate-500">یک تیکت را برای شروع مشاوره پشتیبانی انتخاب کنید.</p>
+                    <h4 className="font-extrabold text-xs text-slate-400">
+                      تیکتی در فرآیند بررسی پلتفرم نیست
+                    </h4>
+                    <p className="text-[10px] text-slate-500">
+                      یک تیکت را برای شروع مشاوره پشتیبانی انتخاب کنید.
+                    </p>
                   </div>
                 )}
               </div>
@@ -957,20 +1260,28 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
         {activeTab === "announcements" && (
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-extrabold text-white">مدیریت اعلانات همگانی سایت</h2>
-              <p className="text-xs text-slate-400 mt-1">متون هشداری یا آپدیت های سیستمی را برای تمام کاربران در بالای داشبوردشان نمایش دهید.</p>
+              <h2 className="text-xl font-extrabold text-white">
+                مدیریت اعلانات همگانی سایت
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                متون هشداری یا آپدیت های سیستمی را برای تمام کاربران در بالای
+                داشبوردشان نمایش دهید.
+              </p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
               {/* Form poster */}
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-xs font-bold text-slate-300 block">انتشار دکمه اعلان جدید :</span>
-                
+                <span className="text-xs font-bold text-slate-300 block">
+                  انتشار دکمه اعلان جدید :
+                </span>
+
                 <form onSubmit={handlePostAnnouncement} className="space-y-4">
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400">عنوان اصلی اعلان :</label>
-                    <input 
+                    <label className="text-[10px] font-bold text-slate-400">
+                      عنوان اصلی اعلان :
+                    </label>
+                    <input
                       type="text"
                       placeholder="بروزرسانی هسته کانتینر پلتفرم"
                       value={annTitle}
@@ -980,8 +1291,10 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400">توضیحات تکمیلی پیام :</label>
-                    <textarea 
+                    <label className="text-[10px] font-bold text-slate-400">
+                      توضیحات تکمیلی پیام :
+                    </label>
+                    <textarea
                       rows={3}
                       placeholder="متن پیام خود را بنویسید..."
                       value={annDesc}
@@ -991,14 +1304,29 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="text-[10px] font-bold text-slate-400">آدرس تصویر گرافیکی پس‌زمینه اعلان (اختیاری) :</label>
-                    <input 
-                      type="text"
-                      placeholder="https://images.unsplash.com/photo-1620121692029-d088224ddc74?w=800&q=80"
-                      value={annImage}
-                      onChange={(e) => setAnnImage(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-850 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
-                    />
+                    <label className="text-[10px] font-bold text-slate-400">
+                      آدرس تصویر گرافیکی پس‌زمینه اعلان (اختیاری) :
+                    </label>
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        placeholder="بارگذاری فایل یا آدرس تصویر..."
+                        value={annImage}
+                        onChange={(e) => setAnnImage(e.target.value)}
+                        className="flex-1 bg-slate-950 border border-slate-850 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                      />
+                      <label className="flex items-center justify-center bg-slate-800 hover:bg-slate-700 w-10 h-10 rounded-xl cursor-pointer">
+                        <UploadCloud className="w-4 h-4 text-slate-400" />
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) =>
+                            handleFileInputChange(e, setAnnImage)
+                          }
+                        />
+                      </label>
+                    </div>
                   </div>
 
                   <button
@@ -1012,16 +1340,27 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
 
               {/* Announcements List to manage removal */}
               <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800 space-y-4">
-                <span className="text-xs font-bold text-slate-300 block">لیست پیام های منتشر شده جاری :</span>
+                <span className="text-xs font-bold text-slate-300 block">
+                  لیست پیام های منتشر شده جاری :
+                </span>
                 {announcements.length === 0 ? (
-                  <p className="text-xs text-slate-500 py-6 text-center">اعلانی منتشر نشده است</p>
+                  <p className="text-xs text-slate-500 py-6 text-center">
+                    اعلانی منتشر نشده است
+                  </p>
                 ) : (
                   <div className="space-y-3 max-h-[350px] overflow-y-auto">
-                    {announcements.map(ann => (
-                      <div key={ann.id} className="p-3.5 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-xs">
+                    {announcements.map((ann) => (
+                      <div
+                        key={ann.id}
+                        className="p-3.5 rounded-xl bg-slate-950 border border-slate-850 flex items-center justify-between text-xs"
+                      >
                         <div>
-                          <h4 className="font-extrabold text-yellow-500">{ann.title}</h4>
-                          <p className="text-[10px] text-slate-400 mt-1 lines-clamp-2">{ann.description}</p>
+                          <h4 className="font-extrabold text-yellow-500">
+                            {ann.title}
+                          </h4>
+                          <p className="text-[10px] text-slate-400 mt-1 lines-clamp-2">
+                            {ann.description}
+                          </p>
                         </div>
                         <button
                           onClick={() => handleDeleteAnnouncement(ann.id)}
@@ -1034,7 +1373,6 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
                   </div>
                 )}
               </div>
-
             </div>
           </div>
         )}
@@ -1043,44 +1381,187 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
         {activeTab === "banners" && (
           <div className="space-y-6 max-w-4xl">
             <div>
-              <h2 className="text-xl font-extrabold text-white">مديريت بنرهاي تبليغاتي پورتال</h2>
-              <p className="text-xs text-slate-400 mt-1">تصاویر گرافیکی اسلایدهای تبلیغاتی که در پنل داشبورد مشتریان ظاهر می شوند را ویرایش فرمایید.</p>
+              <h2 className="text-xl font-extrabold text-white">
+                مديريت بنرهاي تبليغاتي پورتال
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                تصاویر گرافیکی اسلایدهای تبلیغاتی که در پنل داشبورد مشتریان ظاهر
+                می شوند را ویرایش فرمایید.
+              </p>
             </div>
 
             <div className="p-6 rounded-2xl bg-slate-900 border border-slate-800 space-y-6">
-              
-              <div className="space-y-4">
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">آدرس تصویر تبلیغاتی بنر ۱ (نسبت ابعاد عکس ۲.۱:۱) :</label>
-                  <input 
-                    type="text"
-                    value={adBanner1}
-                    onChange={(e) => setAdBanner1(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2.5 px-3 text-xs text-slate-200 outline-none font-mono text-left"
-                  />
-                  {adBanner1 && <img src={adBanner1} className="w-40 aspect-[2.1] object-cover rounded-lg mt-1 border border-white/5" />}
+              <div className="space-y-8">
+                <div className="space-y-3 p-4 border border-slate-800 rounded-xl bg-slate-950/50">
+                  <div className="flex gap-4">
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        تصویر بنر ۱ (هدر کوچک - ۲.۱:۱) :
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={adBanner1}
+                          placeholder="آدرس اینترنتی یا بارگذاری فایل"
+                          onChange={(e) => setAdBanner1(e.target.value)}
+                          className="flex-1 bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                        />
+                        <label className="flex items-center justify-center bg-slate-800 hover:bg-slate-700 w-[38px] rounded-xl cursor-pointer">
+                          <UploadCloud className="w-4 h-4 text-slate-400" />
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleFileInputChange(e, setAdBanner1)
+                            }
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        عنوان و راهنما بنر ۱ :
+                      </label>
+                      <input
+                        type="text"
+                        value={adTitle1}
+                        onChange={(e) => setAdTitle1(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        لینک مقصد بنر ۱ :
+                      </label>
+                      <input
+                        type="text"
+                        value={adLink1}
+                        onChange={(e) => setAdLink1(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                      />
+                    </div>
+                  </div>
+                  {adBanner1 && (
+                    <img
+                      src={adBanner1}
+                      className="w-40 aspect-[2.1] object-cover rounded-lg mt-1 border border-white/5"
+                    />
+                  )}
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">آدرس تصویر تبلیغاتی بنر ۲ :</label>
-                  <input 
-                    type="text"
-                    value={adBanner2}
-                    onChange={(e) => setAdBanner2(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2.5 px-3 text-xs text-slate-200 outline-none font-mono text-left"
-                  />
-                  {adBanner2 && <img src={adBanner2} className="w-40 aspect-[2.1] object-cover rounded-lg mt-1 border border-white/5" />}
+                <div className="space-y-3 p-4 border border-slate-800 rounded-xl bg-slate-950/50">
+                  <div className="flex gap-4">
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        تصویر بنر ۲ (پایین آمار) :
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={adBanner2}
+                          onChange={(e) => setAdBanner2(e.target.value)}
+                          className="flex-1 bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                        />
+                        <label className="flex items-center justify-center bg-slate-800 hover:bg-slate-700 w-[38px] rounded-xl cursor-pointer">
+                          <UploadCloud className="w-4 h-4 text-slate-400" />
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleFileInputChange(e, setAdBanner2)
+                            }
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        عنوان و راهنما بنر ۲ :
+                      </label>
+                      <input
+                        type="text"
+                        value={adTitle2}
+                        onChange={(e) => setAdTitle2(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        لینک مقصد بنر ۲ :
+                      </label>
+                      <input
+                        type="text"
+                        value={adLink2}
+                        onChange={(e) => setAdLink2(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                      />
+                    </div>
+                  </div>
+                  {adBanner2 && (
+                    <img
+                      src={adBanner2}
+                      className="w-40 aspect-[2.1] object-cover rounded-lg mt-1 border border-white/5"
+                    />
+                  )}
                 </div>
 
-                <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-slate-300">آدرس تصویر تبلیغاتی بنر ۳ :</label>
-                  <input 
-                    type="text"
-                    value={adBanner3}
-                    onChange={(e) => setAdBanner3(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2.5 px-3 text-xs text-slate-200 outline-none font-mono text-left"
-                  />
-                  {adBanner3 && <img src={adBanner3} className="w-40 aspect-[2.1] object-cover rounded-lg mt-1 border border-white/5" />}
+                <div className="space-y-3 p-4 border border-slate-800 rounded-xl bg-slate-950/50">
+                  <div className="flex gap-4">
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        تصویر بنر ۳ (پایین آمار) :
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          value={adBanner3}
+                          onChange={(e) => setAdBanner3(e.target.value)}
+                          className="flex-1 bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                        />
+                        <label className="flex items-center justify-center bg-slate-800 hover:bg-slate-700 w-[38px] rounded-xl cursor-pointer">
+                          <UploadCloud className="w-4 h-4 text-slate-400" />
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="image/*"
+                            onChange={(e) =>
+                              handleFileInputChange(e, setAdBanner3)
+                            }
+                          />
+                        </label>
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        عنوان و راهنما بنر ۳ :
+                      </label>
+                      <input
+                        type="text"
+                        value={adTitle3}
+                        onChange={(e) => setAdTitle3(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none"
+                      />
+                    </div>
+                    <div className="space-y-1.5 flex-1">
+                      <label className="text-xs font-bold text-slate-300">
+                        لینک مقصد بنر ۳ :
+                      </label>
+                      <input
+                        type="text"
+                        value={adLink3}
+                        onChange={(e) => setAdLink3(e.target.value)}
+                        className="w-full bg-slate-950 border border-slate-850 focus:border-indigo-500 rounded-xl py-2 px-3 text-xs text-slate-200 outline-none font-mono text-left"
+                      />
+                    </div>
+                  </div>
+                  {adBanner3 && (
+                    <img
+                      src={adBanner3}
+                      className="w-40 aspect-[2.1] object-cover rounded-lg mt-1 border border-white/5"
+                    />
+                  )}
                 </div>
               </div>
 
@@ -1093,19 +1574,22 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
             </div>
           </div>
         )}
-
       </main>
 
       {/* 4. USER DETAILS EDIT DIALOG MODAL */}
       {editingUser && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="w-full max-w-lg bg-slate-900 border border-slate-800 rounded-3xl p-6 text-right space-y-4">
-            <h3 className="font-extrabold text-base text-white border-r-4 border-indigo-500 pr-2">ویرایش مشخصات لایسنس: {editingUser.fullName}</h3>
+            <h3 className="font-extrabold text-base text-white border-r-4 border-indigo-500 pr-2">
+              ویرایش مشخصات لایسنس: {editingUser.fullName}
+            </h3>
 
             <form onSubmit={handleEditUserSubmit} className="space-y-4">
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">نام کامل تجاری :</label>
-                <input 
+                <label className="text-xs font-bold text-slate-300">
+                  نام کامل تجاری :
+                </label>
+                <input
                   type="text"
                   value={editFullName}
                   onChange={(e) => setEditFullName(e.target.value)}
@@ -1114,8 +1598,10 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">آدرس ایمیل کاربر :</label>
-                <input 
+                <label className="text-xs font-bold text-slate-300">
+                  آدرس ایمیل کاربر :
+                </label>
+                <input
                   type="email"
                   value={editEmail}
                   onChange={(e) => setEditEmail(e.target.value)}
@@ -1124,8 +1610,10 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">تلفن همراه :</label>
-                <input 
+                <label className="text-xs font-bold text-slate-300">
+                  تلفن همراه :
+                </label>
+                <input
                   type="tel"
                   maxLength={11}
                   value={editPhone}
@@ -1135,8 +1623,10 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
               </div>
 
               <div className="space-y-1.5">
-                <label className="text-xs font-bold text-slate-300">تغییر پسورد یا رمز عبور (خالی بگذارید تا بدون تغییر بماند) :</label>
-                <input 
+                <label className="text-xs font-bold text-slate-300">
+                  تغییر پسورد یا رمز عبور (خالی بگذارید تا بدون تغییر بماند) :
+                </label>
+                <input
                   type="text"
                   placeholder="پسورد جدید..."
                   value={editPassword}
@@ -1164,7 +1654,6 @@ export default function AdminPanel({ onBypassLogin, onLogout, onCloseAdmin }: Ad
           </div>
         </div>
       )}
-
     </div>
   );
 }

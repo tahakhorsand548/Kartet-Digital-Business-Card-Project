@@ -114,4 +114,5 @@ export interface AdvertisingBanner {
   id: string;
   imageUrl: string;
   title: string;
+  link?: string;
 }
